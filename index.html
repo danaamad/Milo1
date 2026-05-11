@@ -50,25 +50,23 @@
         .message {
             background-color: var(--wa-bubble-white);
             padding: 8px 12px;
-            border-radius: 8px 0 8px 8px; /* פינה אחת חדה להתאמה לזנב */
+            border-radius: 8px;
             max-width: 85%;
             align-self: flex-start;
             position: relative;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
             animation: fadeIn 0.2s ease;
-            margin-right: 10px;
         }
 
-        /* עיצוב הזנב של הבועה לצד ימין (RTL) */
         .message::before {
             content: "";
             position: absolute;
             top: 0;
-            right: -10px;
+            right: -8px;
             width: 0; height: 0;
             border-style: solid;
-            border-width: 0 10px 10px 0;
-            border-color: transparent var(--wa-bubble-white) transparent transparent;
+            border-width: 10px 10px 0 0;
+            border-color: var(--wa-bubble-white) transparent transparent transparent;
         }
 
         .sender-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; display: block; }
@@ -82,7 +80,7 @@
         }
 
         #chat-window::-webkit-scrollbar { width: 6px; }
-        #chat-window::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 10px; }
+        #chat-window::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -151,40 +149,32 @@
 
         function addMessage() {
             const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
-            
-            // הצגת מצב "מקליד" לפני הופעת ההודעה
-            typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            msgDiv.innerHTML = `
+                <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
+                <span class="msg-text">${randomMsg.text}</span>
+                <div class="msg-footer">
+                    <span>${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}</span>
+                    <span class="tick">✔✔</span>
+                </div>
+            `;
+            chatWindow.appendChild(msgDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            setTimeout(() => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message';
-                const now = new Date();
-                const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-                
-                msgDiv.innerHTML = `
-                    <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
-                    <span class="msg-text">${randomMsg.text}</span>
-                    <div class="msg-footer">
-                        <span>${timeStr}</span>
-                        <span class="tick">✔✔</span>
-                    </div>
-                `;
-                
-                chatWindow.appendChild(msgDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-                typingStatus.innerText = "מחובר";
-            }, 1000); // השהייה קלה כדי לדמות הקלדה
+            typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
+            setTimeout(() => { typingStatus.innerText = "מחובר"; }, 800);
         }
 
         function scheduleNext() {
-            const randomDelay = Math.floor(Math.random() * 2000) + 2000; 
+            // קצב מהיר: הודעה חדשה כל 1.5 עד 3 שניות
+            const randomDelay = Math.floor(Math.random() * 1500) + 1500; 
             setTimeout(() => {
                 addMessage();
                 scheduleNext();
             }, randomDelay);
         }
 
-        // הודעה ראשונה
         addMessage();
         scheduleNext();
     </script>
