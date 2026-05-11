@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אט מילואים - צפון</title>
+    <title>עדכוני תנועה והגעה - גזרת צפון</title>
     <style>
         :root {
             --wa-header: #075e54;
             --wa-bg: #e5ddd5;
             --wa-bubble-white: #ffffff;
+            --wa-bubble-green: #dcf8c6;
         }
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             background-color: var(--wa-bg);
-            /* רקע דמוי וואטסאפ */
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             display: flex;
             flex-direction: column;
@@ -23,7 +23,6 @@
             overflow: hidden;
         }
 
-        /* כותרת */
         .header {
             background-color: var(--wa-header);
             color: white;
@@ -36,17 +35,9 @@
             z-index: 10;
         }
 
-        .header-text h1 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
+        .header-text h1 { margin: 0; font-size: 1.1rem; }
+        .header-text span { font-size: 0.8rem; opacity: 0.8; }
 
-        .header-text span {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        /* אזור הצ'אט */
         #chat-window {
             flex: 1;
             overflow-y: auto;
@@ -57,7 +48,6 @@
             scroll-behavior: smooth;
         }
 
-        /* בועת הודעה */
         .message {
             background-color: var(--wa-bubble-white);
             padding: 8px 12px;
@@ -66,143 +56,128 @@
             align-self: flex-start;
             position: relative;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.15s ease-out;
         }
 
-        /* שפיץ של הבועה */
+        /* הודעות "מפקדים" ייראו קצת אחרת (ירוק בהיר) */
+        .message.commander {
+            background-color: var(--wa-bubble-green);
+        }
+
         .message::before {
             content: "";
             position: absolute;
             top: 0;
             right: -8px;
-            width: 0;
-            height: 0;
+            width: 0; height: 0;
             border-style: solid;
             border-width: 10px 10px 0 0;
-            border-color: var(--wa-bubble-white) transparent transparent transparent;
+            border-color: inherit;
         }
 
-        .sender-name {
-            font-weight: bold;
-            font-size: 0.85rem;
-            margin-bottom: 4px;
-            display: block;
-        }
+        .message.white::before { border-color: var(--wa-bubble-white) transparent transparent transparent; }
+        .message.green::before { border-color: var(--wa-bubble-green) transparent transparent transparent; }
 
-        .msg-text {
-            font-size: 0.95rem;
-            color: #111;
-            line-height: 1.4;
-        }
-
-        .msg-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 4px;
-        }
-
-        .tick {
-            margin-right: 3px;
-            color: #4fc3f7;
-        }
+        .sender-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; display: block; }
+        .msg-text { font-size: 0.95rem; color: #111; line-height: 1.4; font-weight: 500; }
+        .msg-footer { display: flex; justify-content: flex-end; align-items: center; font-size: 0.7rem; color: #888; margin-top: 4px; }
+        .tick { margin-right: 3px; color: #4fc3f7; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* הסתרת סרגל גלילה */
-        #chat-window::-webkit-scrollbar {
-            width: 6px;
-        }
-        #chat-window::-webkit-scrollbar-thumb {
-            background-color: rgba(0,0,0,0.1);
-            border-radius: 10px;
-        }
+        #chat-window::-webkit-scrollbar { width: 6px; }
+        #chat-window::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-text">
-            <h1>פלוגת מילואים - עדכוני צפון 🌲</h1>
-            <span id="typing-status">הודעות מתקבלות...</span>
+            <h1>פקודות הגעה ותנועה - צפון 🌲</h1>
+            <span id="typing-status">מעדכן מיקומים...</span>
         </div>
     </div>
 
-    <div id="chat-window">
-        <!-- הודעות יופיעו כאן -->
-    </div>
+    <div id="chat-window"></div>
 
     <script>
         const messagePool = [
-            { sender: "קמב\"ץ", text: "התייצבות ביום ראשון בשעה 08:00 במחנה נפתלי", color: "#e542a3" },
-            { sender: "רס\"פ", text: "מי שלא שלח מידת נעליים - לשלוח לי עכשיו בפרטי!", color: "#25d366" },
-            { sender: "מ\"פ", text: "תדרוך פלוגתי ראשון בנקודת הכינוס ב-09:30", color: "#34b7f1" },
-            { sender: "שלישות", text: "נא לוודא שכולם מילאו הצהרת בריאות באפליקציה", color: "#ff2e63" },
-            { sender: "קצין קשר", text: "בדיקת מכשירי קשר במוצאי שבת, כולם להיות זמינים", color: "#f9ed69" },
-            { sender: "קמב\"ץ", text: "עדכון: רכב הסעות יצא מרכבת מרכז ב-07:00", color: "#e542a3" },
-            { sender: "לוגיסטיקה", text: "ציוד חורף (חרמוניות) יחולק ביום שני", color: "#08d9d6" },
-            { sender: "מ\"פ", text: "סומך עליכם, בואו עם מוטיבציה. שבת שלום לכולם", color: "#34b7f1" },
-            { sender: "רס\"פ", text: "מי מביא גזייה? חסר לנו קפה לצוות 3", color: "#25d366" },
-            { sender: "קמב\"ץ", text: "תזכורת: הגעה במדים מלאים בלבד לנקודת הכינוס", color: "#e542a3" }
+    // --- מ"פ (#34b7f1 | ירוק) ---
+    { sender: "מ\"פ", text: "חברים שינוי משימה: כולם להתייצב בצומת כ\"ח ב-08:30!", color: "#34b7f1", type: "green" },
+    { sender: "מ\"פ", text: "חיילים חובה להגיע תוך שעה לנקודת הריכוז במחנה נפתלי!", color: "#34b7f1", type: "green" },
+    { sender: "מ\"פ", text: "דחוף!! שינוי במיקום: דלגו מיד לצומת עמיעד, פגישה ב-07:00", color: "#34b7f1", type: "green" },
+    { sender: "מ\"פ", text: "שימו לב - המשימה הוקדמה! כולם בקיבוץ דן עד 13:00", color: "#34b7f1", type: "green" },
+    { sender: "מ\"פ", text: "מי שלא פה לא יוצא! ריכוז סופי במחנה פילון ב-11:30", color: "#34b7f1", type: "green" },
+
+    // --- סמ\"פ (#ff9800 | ירוק) ---
+    { sender: "סמ\"פ", text: "עדכון של הרגע האחרון: נקודת המפגש שונתה לצומת גולני ב-09:15", color: "#ff9800", type: "green" },
+    { sender: "סמ\"פ", text: "חברים ללחוץ! חייבים להיות בצומת קדרים ב-08:00 בדיוק", color: "#ff9800", type: "green" },
+    { sender: "סמ\"פ", text: "דחוף ביותר: שינוי פקודת תנועה - הגעה למחנה יצחק ב-10:45", color: "#ff9800", type: "green" },
+    { sender: "סמ\"פ", text: "חיילים, נא להזדרז! חבירה לצוותים בצומת המצודות ב-14:20", color: "#ff9800", type: "green" },
+
+    // --- רס\"פ (#25d366 | לבן) ---
+    { sender: "רס\"פ", text: "דחוף!! משאית הציוד זזה. כולם במחסני בית הלל ב-15:00, אל תאחרו!", color: "#25d366", type: "white" },
+    { sender: "רס\"פ", text: "חברים, שינוי במיקום החלוקה: הגעה לחניון שמשון ב-07:30", color: "#25d366", type: "white" },
+    { sender: "רס\"פ", text: "תתעוררו! מי שלא בצומת המוביל ב-06:45 נשאר בלי ציוד", color: "#25d366", type: "white" },
+    { sender: "רס\"פ", text: "חיילים חובה להתייצב ב-08:15 ברכבת נהריה להסעה אחרונה!", color: "#25d366", type: "white" },
+    { sender: "רס\"פ", text: "דחוף! נקודת האספקה עברה לצומת פוריה ב-09:00, מי פה?", color: "#25d366", type: "white" },
+
+    // --- משה\"ד (#ff2e63 | לבן) ---
+    { sender: "משה\"ד", text: "צוות רפואי - דחוף!! שינוי מיקום למרפאת עמיעד עד 08:00", color: "#ff2e63", type: "white" },
+    { sender: "משה\"ד", text: "חברים, עדכון משימה: פתיחת תאג\"ד בצומת הגומא ב-09:30", color: "#ff2e63", type: "white" },
+    { sender: "משה\"ד", text: "חובה להגיע תוך חצי שעה לחמ\"ל הפלוגתי לעדכון פצועים", color: "#ff2e63", type: "white" },
+    { sender: "משה\"ד", text: "דחוף! שינוי בנקודת הפינוי: כולם במפקדת החטיבה ב-14:00", color: "#ff2e63", type: "white" },
+
+    // --- קמב\"ץ (#e542a3 | לבן) ---
+    { sender: "קמב\"ץ", text: "שינוי דחוף בציר! כולם לעבור לצומת ראש פינה ב-10:30", color: "#e542a3", type: "white" },
+    { sender: "קמב\"ץ", text: "חברים, עדכון תנועה: חסימה בכביש. הגעה לקרית שמונה ב-12:45", color: "#e542a3", type: "white" },
+    { sender: "קמב\"ץ", text: "דחוף!! שינוי מיקום חבירה - צומת כורזין בשעה 09:50", color: "#e542a3", type: "white" },
+    { sender: "קמב\"ץ", text: "חיילים, פקודה חדשה: התייצבות בתחנת דלק מחניים ב-08:20", color: "#e542a3", type: "white" },
+    { sender: "קמב\"ץ", text: "דחוף! נקודת הדיווח עברה לצומת גדות ב-15:30, לא לאחר!", color: "#e542a3", type: "white" }
         ];
 
         const chatWindow = document.getElementById('chat-window');
         const typingStatus = document.getElementById('typing-status');
 
-        function getCurrentTime() {
-            const now = new Date();
-            return now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        }
-
         function addMessage() {
-            // בחירת הודעה אקראית מהרשימה
             const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
-            
-            // יצירת אלמנט ההודעה
             const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
+            // הגדרת סוג הבועה (לבן או ירוק)
+            const bubbleClass = randomMsg.type === "green" ? "commander green" : "white";
+            msgDiv.className = `message ${bubbleClass}`;
             
             msgDiv.innerHTML = `
                 <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
                 <span class="msg-text">${randomMsg.text}</span>
                 <div class="msg-footer">
-                    <span>${getCurrentTime()}</span>
+                    <span>${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}</span>
                     <span class="tick">✔✔</span>
                 </div>
             `;
-            
-            // הוספה לחלון הצ'אט
             chatWindow.appendChild(msgDiv);
-            
-            // גלילה אוטומטית למטה
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            // עדכון סטטוס "מקליד"
+            // אפקט "מקליד" דינמי
             typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
-            setTimeout(() => {
-                typingStatus.innerText = "מחובר";
-            }, 1500);
+            setTimeout(() => { typingStatus.innerText = "מחובר"; }, 600);
         }
 
-        // הוספת הודעה ראשונה מיד
-        addMessage();
-
-        // הוספת הודעה חדשה כל 4-7 שניות (זמן אקראי כדי שירגיש טבעי)
         function scheduleNext() {
-            const randomDelay = Math.floor(Math.random() * 3000) + 4000; 
+            // קצב מהיר מאוד להמחשת דינמיות: 1-3 שניות
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000; 
             setTimeout(() => {
                 addMessage();
                 scheduleNext();
             }, randomDelay);
         }
 
+        // הודעות התחלה
+        addMessage();
+        setTimeout(addMessage, 1000);
         scheduleNext();
     </script>
-
 </body>
 </html>
