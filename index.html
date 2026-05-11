@@ -95,53 +95,35 @@
     <div id="chat-window"></div>
 
     <script>
+        // הודעות מחולקות לפי נושאים
+        const messagesByCategory = {
+            operational: [
+                { sender: "מ\"פ", text: "חברים שינוי משימה: כולם להתייצב בצומת כ\"ח ב-08:30!", color: "#34b7f1" },
+                { sender: "מ\"פ", text: "חיילים חובה להגיע תוך שעה לנקודת הריכוז במחנה נפתלי!", color: "#34b7f1" },
+                { sender: "מ\"פ", text: "דחוף!! שינוי במיקום: דלגו מיד לצומת עמיעד, פגישה ב-07:00", color: "#34b7f1" },
+                { sender: "מ\"פ", text: "שימו לב - המשימה הוקדמה! כולם בקיבוץ דן עד 13:00", color: "#34b7f1" },
+                { sender: "סמ\"פ", text: "עדכון של הרגע האחרון: נקודת המפגש שונתה לצומת גולני ב-09:15", color: "#ff9800" },
+                { sender: "סמ\"פ", text: "חברים ללחוץ! חייבים להיות בצומת קדרים ב-08:00 בדיוק", color: "#ff9800" }
+            ],
+            logistics: [
+                { sender: "רס\"פ", text: "דחוף!! משאית הציוד זזה. כולם במחסני בית הלל ב-15:00", color: "#25d366" },
+                { sender: "רס\"פ", text: "תתעוררו! מי שלא בצומת המוביל ב-06:45 נשאר בלי ציוד", color: "#25d366" },
+                { sender: "קמב\"ץ", text: "שינוי דחוף בציר! כולם לעבור לצומת ראש פינה ב-10:30", color: "#e542a3" },
+                { sender: "קמב\"ץ", text: "איסוף במוצאי שבת ממרכזית המפרץ ב-22:00", color: "#e542a3" },
+                { sender: "רס\"פ", text: "תזכורת: מי שלא מביא גזייה שלא יבנה על קפה בבוקר", color: "#25d366" }
+            ],
+            medical: [
+                { sender: "משה\"ד", text: "צוות רפואי - דחוף!! שינוי מיקום למרפאת עמיעד עד 08:00", color: "#ff2e63" },
+                { sender: "משה\"ד", text: "חברים, עדכון משימה: פתיחת תאג\"ד בצומת הגומא ב-09:30", color: "#ff2e63" },
+                { sender: "משה\"ד", text: "חובה להגיע תוך חצי שעה לחמ\"ל הפלוגתי לעדכון פצועים", color: "#ff2e63" }
+            ]
+        };
+
+        // איחוד כל ההודעות לרשימה אחת לצורך ההגרלה
         const messagePool = [
-    // --- מ"פ (#34b7f1 | ירוק) ---
-    { sender: "מ\"פ", text: "חברים שינוי משימה: כולם להתייצב בצומת כ\"ח ב-08:30!", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "חיילים חובה להגיע תוך שעה לנקודת הריכוז במחנה נפתלי!", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "דחוף!! שינוי במיקום: דלגו מיד לצומת עמיעד, פגישה ב-07:00", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "שימו לב - המשימה הוקדמה! כולם בקיבוץ דן עד 13:00", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "מי שלא פה לא יוצא! ריכוז סופי במחנה פילון ב-11:30", color: "#34b7f1", type: "green" },
-
-    // --- סמ\"פ (#ff9800 | ירוק) ---
-    { sender: "סמ\"פ", text: "עדכון של הרגע האחרון: נקודת המפגש שונתה לצומת גולני ב-09:15", color: "#ff9800", type: "green" },
-    { sender: "סמ\"פ", text: "חברים ללחוץ! חייבים להיות בצומת קדרים ב-08:00 בדיוק", color: "#ff9800", type: "green" },
-    { sender: "סמ\"פ", text: "דחוף ביותר: שינוי פקודת תנועה - הגעה למחנה יצחק ב-10:45", color: "#ff9800", type: "green" },
-    { sender: "סמ\"פ", text: "חיילים, נא להזדרז! חבירה לצוותים בצומת המצודות ב-14:20", color: "#ff9800", type: "green" },
-
-    // --- רס\"פ (#25d366 | לבן) ---
-    { sender: "רס\"פ", text: "דחוף!! משאית הציוד זזה. כולם במחסני בית הלל ב-15:00, אל תאחרו!", color: "#25d366", type: "white" },
-    { sender: "רס\"פ", text: "חברים, שינוי במיקום החלוקה: הגעה לחניון שמשון ב-07:30", color: "#25d366", type: "white" },
-    { sender: "רס\"פ", text: "תתעוררו! מי שלא בצומת המוביל ב-06:45 נשאר בלי ציוד", color: "#25d366", type: "white" },
-    { sender: "רס\"פ", text: "חיילים חובה להתייצב ב-08:15 ברכבת נהריה להסעה אחרונה!", color: "#25d366", type: "white" },
-    { sender: "רס\"פ", text: "דחוף! נקודת האספקה עברה לצומת פוריה ב-09:00, מי פה?", color: "#25d366", type: "white" },
-
-    // --- משה\"ד (#ff2e63 | לבן) ---
-    { sender: "משה\"ד", text: "צוות רפואי - דחוף!! שינוי מיקום למרפאת עמיעד עד 08:00", color: "#ff2e63", type: "white" },
-    { sender: "משה\"ד", text: "חברים, עדכון משימה: פתיחת תאג\"ד בצומת הגומא ב-09:30", color: "#ff2e63", type: "white" },
-    { sender: "משה\"ד", text: "חובה להגיע תוך חצי שעה לחמ\"ל הפלוגתי לעדכון פצועים", color: "#ff2e63", type: "white" },
-    { sender: "משה\"ד", text: "דחוף! שינוי בנקודת הפינוי: כולם במפקדת החטיבה ב-14:00", color: "#ff2e63", type: "white" },
-
-    // --- קמב\"ץ (#e542a3 | לבן) ---
-    { sender: "קמב\"ץ", text: "שינוי דחוף בציר! כולם לעבור לצומת ראש פינה ב-10:30", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "חברים, עדכון תנועה: חסימה בכביש. הגעה לקרית שמונה ב-12:45", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "דחוף!! שינוי מיקום חבירה - צומת כורזין בשעה 09:50", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "חיילים, פקודה חדשה: התייצבות בתחנת דלק מחניים ב-08:20", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "דחוף! נקודת הדיווח עברה לצומת גדות ב-15:30, לא לאחר!", color: "#e542a3", type: "white" }
-            // הודעות קמב"ץ (ורוד) - לוגיסטיקה ותנועה
-    { sender: "קמב\"ץ", text: "שינוי דחוף: נקודת הכינוס עברה למחנה פילון עד 09:00", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "עדכון: הגעה למחנה יצחק בשעה 11:00 במקום ב-10:00", color: "#e542a3", type: "white" },type: "white" },
-    { sender: "קמב\"ץ", text: "איסוף במוצאי שבת ממרכזית המפרץ ב-22:00", color: "#e542a3", type: "white" },
-    { sender: "קמב\"ץ", text: "שינוי מיקום סופי: חבירה לצוותים בקיבוץ דן", color: "#e542a3", type: "white" },
-
-    // הודעות מ"פ (כחול/ירוק) - פקודות ולו"ז
-    { sender: "מ\"פ", text: "צוות א' - הגעה ישירה לצומת כ\"ח ב-10:30, לא לאחר!", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "ריכוז פלוגתי במחנה נפתלי בשעה 12:00 לתדרוך גזרה", color: "#34b7f1", type: "green" },
-    { sender: "מ\"פ", text: "צוות ב' - תנועה עצמאית למטולה עד השעה 16:00", color: "#34b7f1", type: "green" },
-
-    // הודעות רס"פ (ירוק) - משמעת וציוד
-    { sender: "רס\"פ", text: "הסעה יוצאת מצומת גולני עוד 10 דקות, מי שלא פה נשאר", color: "#25d366", type: "white" },
-    { sender: "רס\"פ", text: "תזכורת: מי שלא מביא גזייה שלא יבנה על קפה בבוקר", color: "#25d366", type: "white" },
+            ...messagesByCategory.operational,
+            ...messagesByCategory.logistics,
+            ...messagesByCategory.medical
         ];
 
         const chatWindow = document.getElementById('chat-window');
@@ -151,11 +133,15 @@
             const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message';
+            
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
             msgDiv.innerHTML = `
                 <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
                 <span class="msg-text">${randomMsg.text}</span>
                 <div class="msg-footer">
-                    <span>${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}</span>
+                    <span>${timeStr}</span>
                     <span class="tick">✔✔</span>
                 </div>
             `;
@@ -163,12 +149,11 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
             typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
-            setTimeout(() => { typingStatus.innerText = "מחובר"; }, 800);
+            setTimeout(() => { typingStatus.innerText = "מחובר"; }, 1000);
         }
 
         function scheduleNext() {
-            // קצב מהיר: הודעה חדשה כל 1.5 עד 3 שניות
-            const randomDelay = Math.floor(Math.random() * 1500) + 1500; 
+            const randomDelay = Math.floor(Math.random() * 2000) + 2000; 
             setTimeout(() => {
                 addMessage();
                 scheduleNext();
