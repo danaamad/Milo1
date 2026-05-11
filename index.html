@@ -26,11 +26,7 @@
             background-color: var(--wa-header);
             color: white;
             padding: 12px 16px;
-            display: flex;
-            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
             z-index: 10;
         }
 
@@ -95,31 +91,29 @@
     <div id="chat-window"></div>
 
     <script>
-        // הודעות מחולקות לפי נושאים
+        // ארגון ההודעות לפי נושאים כפי שביקשת
         const messagesByCategory = {
-            operational: [
+            operational: [ // מ"פ וסמ"פ
                 { sender: "מ\"פ", text: "חברים שינוי משימה: כולם להתייצב בצומת כ\"ח ב-08:30!", color: "#34b7f1" },
                 { sender: "מ\"פ", text: "חיילים חובה להגיע תוך שעה לנקודת הריכוז במחנה נפתלי!", color: "#34b7f1" },
                 { sender: "מ\"פ", text: "דחוף!! שינוי במיקום: דלגו מיד לצומת עמיעד, פגישה ב-07:00", color: "#34b7f1" },
-                { sender: "מ\"פ", text: "שימו לב - המשימה הוקדמה! כולם בקיבוץ דן עד 13:00", color: "#34b7f1" },
                 { sender: "סמ\"פ", text: "עדכון של הרגע האחרון: נקודת המפגש שונתה לצומת גולני ב-09:15", color: "#ff9800" },
                 { sender: "סמ\"פ", text: "חברים ללחוץ! חייבים להיות בצומת קדרים ב-08:00 בדיוק", color: "#ff9800" }
             ],
-            logistics: [
+            logistics: [ // רס"פ וקמב"ץ
                 { sender: "רס\"פ", text: "דחוף!! משאית הציוד זזה. כולם במחסני בית הלל ב-15:00", color: "#25d366" },
-                { sender: "רס\"פ", text: "תתעוררו! מי שלא בצומת המוביל ב-06:45 נשאר בלי ציוד", color: "#25d366" },
                 { sender: "קמב\"ץ", text: "שינוי דחוף בציר! כולם לעבור לצומת ראש פינה ב-10:30", color: "#e542a3" },
-                { sender: "קמב\"ץ", text: "איסוף במוצאי שבת ממרכזית המפרץ ב-22:00", color: "#e542a3" },
+                { sender: "קמב\"ץ", text: "חברים, עדכון תנועה: חסימה בכביש. הגעה לקרית שמונה ב-12:45", color: "#e542a3" },
                 { sender: "רס\"פ", text: "תזכורת: מי שלא מביא גזייה שלא יבנה על קפה בבוקר", color: "#25d366" }
             ],
-            medical: [
+            medical: [ // משה"ד
                 { sender: "משה\"ד", text: "צוות רפואי - דחוף!! שינוי מיקום למרפאת עמיעד עד 08:00", color: "#ff2e63" },
                 { sender: "משה\"ד", text: "חברים, עדכון משימה: פתיחת תאג\"ד בצומת הגומא ב-09:30", color: "#ff2e63" },
                 { sender: "משה\"ד", text: "חובה להגיע תוך חצי שעה לחמ\"ל הפלוגתי לעדכון פצועים", color: "#ff2e63" }
             ]
         };
 
-        // איחוד כל ההודעות לרשימה אחת לצורך ההגרלה
+        // איחוד כל ההודעות למערך אחד תקין לצורך ההגרלה
         const messagePool = [
             ...messagesByCategory.operational,
             ...messagesByCategory.logistics,
@@ -131,37 +125,39 @@
 
         function addMessage() {
             const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
             
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-
-            msgDiv.innerHTML = `
-                <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
-                <span class="msg-text">${randomMsg.text}</span>
-                <div class="msg-footer">
-                    <span>${timeStr}</span>
-                    <span class="tick">✔✔</span>
-                </div>
-            `;
-            chatWindow.appendChild(msgDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-
+            // עדכון סטטוס מקליד
             typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
-            setTimeout(() => { typingStatus.innerText = "מחובר"; }, 1000);
+
+            setTimeout(() => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message';
+                
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
+                msgDiv.innerHTML = `
+                    <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
+                    <span class="msg-text">${randomMsg.text}</span>
+                    <div class="msg-footer">
+                        <span>${timeStr}</span>
+                        <span class="tick">✔✔</span>
+                    </div>
+                `;
+                chatWindow.appendChild(msgDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                typingStatus.innerText = "מחובר";
+            }, 800);
         }
 
         function scheduleNext() {
-            const randomDelay = Math.floor(Math.random() * 2000) + 2000; 
+            const randomDelay = Math.floor(Math.random() * 2000) + 1500; 
             setTimeout(() => {
                 addMessage();
                 scheduleNext();
             }, randomDelay);
         }
 
+        // הפעלה ראשונית
         addMessage();
         scheduleNext();
-    </script>
-</body>
-</html>
