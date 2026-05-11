@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אט מילואים - עדכונים חיים</title>
+    <title>צ'אט מילואים - צפון</title>
     <style>
         :root {
             --wa-header: #075e54;
@@ -15,6 +15,7 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             background-color: var(--wa-bg);
+            /* רקע דמוי וואטסאפ */
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             display: flex;
             flex-direction: column;
@@ -22,17 +23,30 @@
             overflow: hidden;
         }
 
+        /* כותרת */
         .header {
             background-color: var(--wa-header);
             color: white;
             padding: 12px 16px;
+            display: flex;
+            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
             z-index: 10;
         }
 
-        .header-text h1 { margin: 0; font-size: 1.1rem; }
-        .header-text span { font-size: 0.8rem; opacity: 0.8; }
+        .header-text h1 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
 
+        .header-text span {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* אזור הצ'אט */
         #chat-window {
             flex: 1;
             overflow-y: auto;
@@ -43,6 +57,7 @@
             scroll-behavior: smooth;
         }
 
+        /* בועת הודעה */
         .message {
             background-color: var(--wa-bubble-white);
             padding: 8px 12px;
@@ -51,113 +66,143 @@
             align-self: flex-start;
             position: relative;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            animation: fadeIn 0.2s ease;
+            animation: fadeIn 0.3s ease;
         }
 
+        /* שפיץ של הבועה */
         .message::before {
             content: "";
             position: absolute;
             top: 0;
             right: -8px;
-            width: 0; height: 0;
+            width: 0;
+            height: 0;
             border-style: solid;
             border-width: 10px 10px 0 0;
             border-color: var(--wa-bubble-white) transparent transparent transparent;
         }
 
-        .sender-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; display: block; }
-        .msg-text { font-size: 0.95rem; color: #111; line-height: 1.4; }
-        .msg-footer { display: flex; justify-content: flex-end; align-items: center; font-size: 0.7rem; color: #888; margin-top: 4px; }
-        .tick { margin-right: 3px; color: #4fc3f7; }
+        .sender-name {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .msg-text {
+            font-size: 0.95rem;
+            color: #111;
+            line-height: 1.4;
+        }
+
+        .msg-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .tick {
+            margin-right: 3px;
+            color: #4fc3f7;
+        }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        #chat-window::-webkit-scrollbar { width: 6px; }
-        #chat-window::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
+        /* הסתרת סרגל גלילה */
+        #chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-text">
-            <h1>עדכוני גזרת צפון 🌲</h1>
-            <span id="typing-status">מחובר</span>
+            <h1>פלוגת מילואים - עדכוני צפון 🌲</h1>
+            <span id="typing-status">הודעות מתקבלות...</span>
         </div>
     </div>
 
-    <div id="chat-window"></div>
+    <div id="chat-window">
+        <!-- הודעות יופיעו כאן -->
+    </div>
 
     <script>
-        // ארגון ההודעות לפי נושאים כפי שביקשת
-        const messagesByCategory = {
-            operational: [ // מ"פ וסמ"פ
-                { sender: "מ\"פ", text: "חברים שינוי משימה: כולם להתייצב בצומת כ\"ח ב-08:30!", color: "#34b7f1" },
-                { sender: "מ\"פ", text: "חיילים חובה להגיע תוך שעה לנקודת הריכוז במחנה נפתלי!", color: "#34b7f1" },
-                { sender: "מ\"פ", text: "דחוף!! שינוי במיקום: דלגו מיד לצומת עמיעד, פגישה ב-07:00", color: "#34b7f1" },
-                { sender: "סמ\"פ", text: "עדכון של הרגע האחרון: נקודת המפגש שונתה לצומת גולני ב-09:15", color: "#ff9800" },
-                { sender: "סמ\"פ", text: "חברים ללחוץ! חייבים להיות בצומת קדרים ב-08:00 בדיוק", color: "#ff9800" }
-            ],
-            logistics: [ // רס"פ וקמב"ץ
-                { sender: "רס\"פ", text: "דחוף!! משאית הציוד זזה. כולם במחסני בית הלל ב-15:00", color: "#25d366" },
-                { sender: "קמב\"ץ", text: "שינוי דחוף בציר! כולם לעבור לצומת ראש פינה ב-10:30", color: "#e542a3" },
-                { sender: "קמב\"ץ", text: "חברים, עדכון תנועה: חסימה בכביש. הגעה לקרית שמונה ב-12:45", color: "#e542a3" },
-                { sender: "רס\"פ", text: "תזכורת: מי שלא מביא גזייה שלא יבנה על קפה בבוקר", color: "#25d366" }
-            ],
-            medical: [ // משה"ד
-                { sender: "משה\"ד", text: "צוות רפואי - דחוף!! שינוי מיקום למרפאת עמיעד עד 08:00", color: "#ff2e63" },
-                { sender: "משה\"ד", text: "חברים, עדכון משימה: פתיחת תאג\"ד בצומת הגומא ב-09:30", color: "#ff2e63" },
-                { sender: "משה\"ד", text: "חובה להגיע תוך חצי שעה לחמ\"ל הפלוגתי לעדכון פצועים", color: "#ff2e63" }
-            ]
-        };
-
-        // איחוד כל ההודעות למערך אחד תקין לצורך ההגרלה
         const messagePool = [
-            ...messagesByCategory.operational,
-            ...messagesByCategory.logistics,
-            ...messagesByCategory.medical
+            { sender: "קמב\"ץ", text: "התייצבות ביום ראשון בשעה 08:00 במחנה נפתלי", color: "#e542a3" },
+            { sender: "רס\"פ", text: "מי שלא שלח מידת נעליים - לשלוח לי עכשיו בפרטי!", color: "#25d366" },
+            { sender: "מ\"פ", text: "תדרוך פלוגתי ראשון בנקודת הכינוס ב-09:30", color: "#34b7f1" },
+            { sender: "שלישות", text: "נא לוודא שכולם מילאו הצהרת בריאות באפליקציה", color: "#ff2e63" },
+            { sender: "קצין קשר", text: "בדיקת מכשירי קשר במוצאי שבת, כולם להיות זמינים", color: "#f9ed69" },
+            { sender: "קמב\"ץ", text: "עדכון: רכב הסעות יצא מרכבת מרכז ב-07:00", color: "#e542a3" },
+            { sender: "לוגיסטיקה", text: "ציוד חורף (חרמוניות) יחולק ביום שני", color: "#08d9d6" },
+            { sender: "מ\"פ", text: "סומך עליכם, בואו עם מוטיבציה. שבת שלום לכולם", color: "#34b7f1" },
+            { sender: "רס\"פ", text: "מי מביא גזייה? חסר לנו קפה לצוות 3", color: "#25d366" },
+            { sender: "קמב\"ץ", text: "תזכורת: הגעה במדים מלאים בלבד לנקודת הכינוס", color: "#e542a3" }
         ];
 
         const chatWindow = document.getElementById('chat-window');
         const typingStatus = document.getElementById('typing-status');
 
-        function addMessage() {
-            const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
-            
-            // עדכון סטטוס מקליד
-            typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
-
-            setTimeout(() => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message';
-                
-                const now = new Date();
-                const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-
-                msgDiv.innerHTML = `
-                    <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
-                    <span class="msg-text">${randomMsg.text}</span>
-                    <div class="msg-footer">
-                        <span>${timeStr}</span>
-                        <span class="tick">✔✔</span>
-                    </div>
-                `;
-                chatWindow.appendChild(msgDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-                typingStatus.innerText = "מחובר";
-            }, 800);
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
 
+        function addMessage() {
+            // בחירת הודעה אקראית מהרשימה
+            const randomMsg = messagePool[Math.floor(Math.random() * messagePool.length)];
+            
+            // יצירת אלמנט ההודעה
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            
+            msgDiv.innerHTML = `
+                <span class="sender-name" style="color: ${randomMsg.color}">${randomMsg.sender}</span>
+                <span class="msg-text">${randomMsg.text}</span>
+                <div class="msg-footer">
+                    <span>${getCurrentTime()}</span>
+                    <span class="tick">✔✔</span>
+                </div>
+            `;
+            
+            // הוספה לחלון הצ'אט
+            chatWindow.appendChild(msgDiv);
+            
+            // גלילה אוטומטית למטה
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // עדכון סטטוס "מקליד"
+            typingStatus.innerText = randomMsg.sender + " מקליד/ה...";
+            setTimeout(() => {
+                typingStatus.innerText = "מחובר";
+            }, 1500);
+        }
+
+        // הוספת הודעה ראשונה מיד
+        addMessage();
+
+        // הוספת הודעה חדשה כל 4-7 שניות (זמן אקראי כדי שירגיש טבעי)
         function scheduleNext() {
-            const randomDelay = Math.floor(Math.random() * 2000) + 1500; 
+            const randomDelay = Math.floor(Math.random() * 3000) + 4000; 
             setTimeout(() => {
                 addMessage();
                 scheduleNext();
             }, randomDelay);
         }
 
-        // הפעלה ראשונית
-        addMessage();
         scheduleNext();
+    </script>
+
+</body>
+</html>
